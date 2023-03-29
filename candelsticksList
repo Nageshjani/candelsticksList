@@ -1,0 +1,49 @@
+import yfinance as yf
+import mplfinance as mpf
+import pandas as pd
+from datetime import datetime
+import matplotlib.backends.backend_pdf as pdf
+
+
+
+symbol = '^NSEI'
+start_date = '2023-01-01'
+end_date = '2023-03-28'
+data = yf.download(symbol, start=start_date, end=end_date, interval='1d')
+
+data.index = pd.to_datetime(data.index)
+l=[]
+for datee in data.index:
+
+    timestamp = pd.Timestamp(datee)
+    string = timestamp.strftime('%Y-%m-%d %H:%M:%S')
+    dt_object = datetime.strptime(string, '%Y-%m-%d %H:%M:%S')
+    string = dt_object.strftime('%Y-%m-%d')
+    l.append(string)
+
+
+dates=l
+
+
+
+
+pdf_pages = pdf.PdfPages('candlestick_charts.pdf')
+def pdfs(start_date,end_date):
+
+    symbol = '^NSEI'
+    start_date = start_date
+    end_date = end_date
+    try:
+
+        data = yf.download(symbol, start=start_date, end=end_date, interval='1h')
+        data.index = pd.to_datetime(data.index)
+        fig, ax=mpf.plot(data, type='candle',  title=f'Candlestick Chart for {start_date}', ylabel='Price', returnfig=True)
+        pdf_pages.savefig(fig)
+    except:
+        print(f'something wrong{start_date},{end_date}')
+
+
+for i in range(1,len(dates)):
+    pdfs(dates[i-1],dates[i])
+
+pdf_pages.close()
